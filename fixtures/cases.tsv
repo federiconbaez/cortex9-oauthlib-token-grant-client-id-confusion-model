@@ -1,0 +1,30 @@
+# id	kind	grant	client_auth	authenticated	set_client	body_client_id	scope	user	policy	hand_pre	hand_post
+# Hand-derived labels. Tokens: @missing = no client_id in the body, @empty = ''. Clients low/high from the GHSA PoC, batch = client_credentials only.
+p01_ghsa_cc_admin	pos	client_credentials	confidential	low	auth	high	admin	-	arg	TOKEN_SPLIT	ServerError
+p02_ghsa_password_admin	pos	password	confidential	low	auth	high	admin	ok	arg	TOKEN_SPLIT	ServerError
+p03_grant_type_confusion	pos	password	confidential	batch	auth	high	read	ok	arg	TOKEN_SPLIT	ServerError
+p04_cc_read_spoofed_owner	pos	client_credentials	confidential	low	auth	high	read	-	arg	TOKEN_SPLIT	ServerError
+p05_public_validator_other	pos	password	public	-	other:low	high	admin	ok	arg	TOKEN_SPLIT	ServerError
+p06_device_code_split	pos	device_code	confidential	low	auth	high	admin	-	arg	STAGE_OK_SPLIT	ServerError
+p07_authcode_split	pos	authorization_code	confidential	low	auth	high	@empty	-	arg	STAGE_OK_SPLIT	ServerError
+p08_refresh_split	pos	refresh_token	confidential	low	auth	high	@empty	-	arg	STAGE_OK_SPLIT	ServerError
+n01_ghsa_control_cc	neg	client_credentials	confidential	low	auth	low	admin	-	arg	InvalidScopeError	InvalidScopeError
+n02_ghsa_control_password	neg	password	confidential	low	auth	low	admin	ok	arg	InvalidScopeError	InvalidScopeError
+n03_cc_high_legit	neg	client_credentials	confidential	high	auth	high	admin	-	arg	TOKEN	TOKEN
+n04_bad_secret	neg	client_credentials	confidential	bad	auth	low	read	-	arg	InvalidClientError	InvalidClientError
+n05_password_bad_user	neg	password	confidential	low	auth	low	read	bad	arg	InvalidGrantError	InvalidGrantError
+n06_password_legit	neg	password	confidential	low	auth	low	read	ok	arg	TOKEN	TOKEN
+n07_batch_password_control	neg	password	confidential	batch	auth	batch	read	ok	arg	UnauthorizedClientError	UnauthorizedClientError
+n08_authcode_legit	neg	authorization_code	confidential	low	auth	low	@empty	-	arg	STAGE_OK	STAGE_OK
+n09_public_legit	neg	password	public	-	auth	low	read	ok	arg	TOKEN	TOKEN
+a01_cc_missing_body_id	adv	client_credentials	confidential	low	auth	@missing	read	-	arg	UnauthorizedClientError	TOKEN
+a02_policy_client_admin	adv	client_credentials	confidential	low	auth	high	admin	-	client	InvalidScopeError	ServerError
+a03_policy_client_read	adv	client_credentials	confidential	low	auth	high	read	-	client	TOKEN_SPLIT	ServerError
+a04_validator_sets_none	adv	client_credentials	confidential	low	none	low	read	-	arg	NotImplementedError	NotImplementedError
+a05_password_noattr	adv	password	confidential	low	noattr	low	read	ok	arg	NotImplementedError	NotImplementedError
+a06_refresh_none_client	adv	refresh_token	confidential	low	none	@missing	@empty	-	arg	UnauthorizedClientError	NotImplementedError
+a07_public_missing_id	adv	password	public	-	auth	@missing	read	ok	arg	InvalidClientError	InvalidClientError
+a08_case_variant	adv	client_credentials	confidential	low	auth	LOW	read	-	arg	UnauthorizedClientError	ServerError
+a09_ghost_client	adv	client_credentials	confidential	low	auth	ghost	read	-	arg	UnauthorizedClientError	ServerError
+a10_empty_body_id	adv	client_credentials	confidential	low	auth	@empty	read	-	arg	UnauthorizedClientError	TOKEN
+a11_downgrade_attempt	adv	client_credentials	confidential	high	auth	low	admin	-	arg	InvalidScopeError	ServerError
